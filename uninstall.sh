@@ -2,7 +2,7 @@
 #
 # Be VERY Careful. This script may be executed with admin privileges.
 
-echo "Openframe Website Plugin -- uninstall.sh"
+echo "Openframe Website -- uninstall.sh"
 
 # Some limited platform detection might be in order... though at present we're targeting the Pi
 os=$(uname)
