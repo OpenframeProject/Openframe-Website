@@ -17,7 +17,25 @@ if [ $os == "Linux" ]; then
 
     # same for any debian disto (untested), including rpi (tested)
     sudo apt-get install chromium
-
+    
+    #install chromium from source if not available via apt-get
+    # Raspbian Jesse does not include chromium in apt-get
+    if dpkg -s chromium; then
+        :
+    else
+        # adapted from https://medium.com/@icebob/jessie-on-raspberry-pi-2-with-docker-and-chromium-c43b8d80e7e1#6afd
+        # files from https://launchpad.net/ubuntu/+source/chromium-browser/
+        cfile=$(mktemp)
+        wget https://launchpad.net/ubuntu/+archive/primary/+files/chromium-browser_48.0.2564.116-0ubuntu0.15.10.1.1221_armhf.deb -O $cfile
+        fffile=$(mktep)
+        wget https://launchpad.net/ubuntu/+archive/primary/+files/chromium-codecs-ffmpeg-extra_48.0.2564.116-0ubuntu0.15.10.1.1221_armhf.deb -O $fffile
+        sudo dpkg -i $fffile $cfile
+        #resolve "package old or missing" error
+        sudo apt-get install -f
+        sudo dpkg -i $fffile $cfile
+        #clean up
+        rm $cfile $fffile
+    fi
 
 
     if [ $arq == "armv7l" ]; then
