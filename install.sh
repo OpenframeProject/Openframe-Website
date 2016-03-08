@@ -17,25 +17,6 @@ if [ $os == "Linux" ]; then
 
     # same for any debian disto (untested), including rpi (tested)
     sudo apt-get install chromium
-    
-    #install chromium from source if not available via apt-get
-    # Raspbian Jesse does not include chromium in apt-get
-    if ! dpkg -s chromium; then
-        # Raspbian Jesse does not have chromium in its repositories
-        # adapted from https://medium.com/@icebob/jessie-on-raspberry-pi-2-with-docker-and-chromium-c43b8d80e7e1#6afd
-        # files from https://launchpad.net/ubuntu/+source/chromium-browser/
-        cfile=$(mktemp)
-        wget https://launchpad.net/ubuntu/+archive/primary/+files/chromium-browser_48.0.2564.116-0ubuntu0.15.10.1.1221_armhf.deb -O $cfile
-        fffile=$(mktemp)
-        wget https://launchpad.net/ubuntu/+archive/primary/+files/chromium-codecs-ffmpeg-extra_48.0.2564.116-0ubuntu0.15.10.1.1221_armhf.deb -O $fffile
-        if ! sudo dpkg -i $fffile $cfile; then
-            #resolve "package old or missing" error
-            sudo apt-get install -f
-            sudo dpkg -i $fffile $cfile
-        fi
-        #clean up
-        rm $cfile $fffile
-    fi
 
     if [ $arq == "armv7l" ]; then
         # on RaspberryPi
@@ -45,6 +26,25 @@ if [ $os == "Linux" ]; then
         # FOR NOW, CODE GOES HERE since we're shooting for RPi support
         #
         # ####
+    
+        #install chromium from source if not available via apt-get
+        # Raspbian Jesse does not include chromium in apt-get
+        if ! dpkg -s chromium; then
+            # Raspbian Jesse does not have chromium in its repositories
+            # adapted from https://medium.com/@icebob/jessie-on-raspberry-pi-2-with-docker-and-chromium-c43b8d80e7e1#6afd
+            # files from https://launchpad.net/ubuntu/+source/chromium-browser/
+            # download files
+            cfile=$(mktemp)
+            wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-browser_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $cfile
+            fffile=$(mktemp)
+            wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-codecs-ffmpeg-extra_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $fffile
+            # install
+            sudo dpkg -i $fffile $cfile
+            # symbolic link
+            sudo ln -s /usr/bin/chromium-browser /usr/bin/chromium
+            #clean up
+            rm $cfile $fffile
+        fi
 
         # TODO: update chromium window_placement settings
         echo "armv7l"
