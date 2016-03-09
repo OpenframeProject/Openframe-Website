@@ -29,21 +29,31 @@ if [ $os == "Linux" ]; then
     
         #install chromium from source if not available via apt-get
         # Raspbian Jesse does not include chromium in apt-get
-        if ! dpkg -s chromium; then
-            # Raspbian Jesse does not have chromium in its repositories
-            # adapted from https://medium.com/@icebob/jessie-on-raspberry-pi-2-with-docker-and-chromium-c43b8d80e7e1#6afd
-            # files from https://launchpad.net/ubuntu/+source/chromium-browser/
-            # download files
-            cfile=$(mktemp)
-            wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-browser_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $cfile
-            fffile=$(mktemp)
-            wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-codecs-ffmpeg-extra_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $fffile
-            # install
-            sudo dpkg -i $fffile $cfile
-            # symbolic link
-            sudo ln -s /usr/bin/chromium-browser /usr/bin/chromium
-            #clean up
-            rm $cfile $fffile
+        # if chromium is not where we expect it
+        if ! ls /usr/bin/chromium; then
+            # if chromium is available somewhere else, symlink to it
+            if which chromium; then
+                sudo ln -s `which chromium` /usr/bin/chromium
+            # if chromium-browser is available somwhere, symlink to it
+            elif which chromium-browser; then
+                sudo ln -s `which chromium-browser` /usr/bin/chromium
+            # otherwise we need to download and install chromium
+            else
+                # Raspbian Jesse does not have chromium in its repositories
+                # adapted from https://medium.com/@icebob/jessie-on-raspberry-pi-2-with-docker-and-chromium-c43b8d80e7e1#6afd
+                # files from https://launchpad.net/ubuntu/+source/chromium-browser/
+                # download files
+                cfile=$(mktemp)
+                wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-browser_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $cfile
+                fffile=$(mktemp)
+                wget https://launchpad.net/~canonical-chromium-builds/+archive/ubuntu/stage/+build/8883797/+files/chromium-codecs-ffmpeg-extra_48.0.2564.82-0ubuntu0.15.04.1.1193_armhf.deb -O $fffile
+                # install
+                sudo dpkg -i $fffile $cfile
+                # symbolic link
+                sudo ln -s `which chromium-browser` /usr/bin/chromium
+                #clean up
+                rm $cfile $fffile
+            fi
         fi
 
         # TODO: update chromium window_placement settings
