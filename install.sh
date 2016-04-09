@@ -11,7 +11,7 @@ arq=$(uname -m)
 if [ $os == "Linux" ]; then
 
     # on Debian Linux distributions
-    sudo apt-get update
+    # sudo apt-get update
     # do we really want to upgrade? this could take a damn long time.
     # sudo apt-get upgrade
 
@@ -26,7 +26,7 @@ if [ $os == "Linux" ]; then
         # FOR NOW, CODE GOES HERE since we're shooting for RPi support
         #
         # ####
-    
+
         #install chromium from source if not available via apt-get
         # Raspbian Jesse does not include chromium in apt-get
         # if chromium is not where we expect it
