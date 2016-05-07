@@ -1,4 +1,6 @@
 var assert = require('assert'),
+    exec = require('child_process').exec,
+    fs = require('fs'),
     Extension = require('openframe-extension'),
     WebsiteExtension = require('../extension');
 
@@ -9,6 +11,14 @@ describe('instantiation', function() {
 });
 
 describe('properties', function() {
+    before(function(done) {
+        exec('cp ' + __dirname + '/.xinitrc.spec ' + __dirname + '/.xinitrc', done);
+    });
+
+    after(function(done) {
+        exec('rm ' + __dirname + '/.xinitrc', done);
+    });
+
     it('should include all required format properties', function() {
         var format = WebsiteExtension.props.format;
 
@@ -30,5 +40,27 @@ describe('properties', function() {
 
         assert(format.end_command);
         assert(typeof format.end_command === 'string');
+    });
+
+    it('start_command should update .xinitrc file with supplied token', function(done) {
+        var format = WebsiteExtension.props.format,
+            command,
+            expected = 'exec /usr/bin/chromium --noerrdialogs --kiosk --incognito http://test.com';
+
+        // use test .xinitrc
+        format.xinitrcPath = __dirname + '/.xinitrc';
+
+        // replace $url token with url string
+        command = format.start_command({}, {
+            $url: 'http://test.com'
+        });
+
+        assert(typeof command === 'string');
+
+        fs.readFile(format.xinitrcPath, 'utf8', function(err, data) {
+            if (err) throw err;
+            assert.equal(data, expected);
+            done();
+        });
     });
 });
