@@ -63,9 +63,6 @@ if [ $os == "Linux" ]; then
 
         # TODO: update chromium window_placement settings
 
-
-    else
-        # Non-arm Debian...
     fi
 
 elif [ $os == "Darwin" ]; then
