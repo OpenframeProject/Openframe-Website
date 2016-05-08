@@ -41,7 +41,7 @@ function _replaceTokens(filePath, tokens) {
         // tokens start with a $ which needs to be escaped, oops
         var _token = '\\' + token,
             // use commas as delims so that we don't need to escape value, which might be a URL
-            cmd = 'sudo sed -i "s,' + _token + ',' + value + ',g" ' + filePath;
+            cmd = 'sed -i "s,' + _token + ',' + value + ',g" ' + filePath;
         execSync(cmd);
     }
 
