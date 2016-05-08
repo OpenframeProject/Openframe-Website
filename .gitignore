@@ -5,3 +5,5 @@ artwork/
 npm-debug.log
 coverage/*
 player/*
+.xinitrc
+!.xinitrc.tpl

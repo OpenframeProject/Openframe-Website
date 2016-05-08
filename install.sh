@@ -23,8 +23,8 @@ if [ $os == "Linux" ]; then
     # same for any debian disto (untested), including rpi (tested)
     sudo apt-get install chromium
 
-    if [ $arq == "armv7l" ]; then
-        # on RaspberryPi
+    if [ $arq == "armv7l" ] || [ $arq == "armv6l" ]; then
+        # on RaspberryPi or other arm 6/7 device
 
         # ####
         #
@@ -62,12 +62,10 @@ if [ $os == "Linux" ]; then
         fi
 
         # TODO: update chromium window_placement settings
-        echo "armv7l"
 
 
     else
-        # Non-arm7 Debian...
-        echo "non armv7l"
+        # Non-arm Debian...
     fi
 
 elif [ $os == "Darwin" ]; then
