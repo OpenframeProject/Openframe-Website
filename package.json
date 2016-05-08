@@ -1,6 +1,6 @@
 {
   "name": "openframe-website",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Openframe extension which adds support for website-based artwork via chromium.",
   "main": "extension.js",
   "scripts": {
