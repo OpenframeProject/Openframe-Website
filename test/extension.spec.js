@@ -11,10 +11,6 @@ describe('instantiation', function() {
 });
 
 describe('properties', function() {
-    before(function(done) {
-        exec('cp ' + __dirname + '/.xinitrc.spec ' + __dirname + '/.xinitrc', done);
-    });
-
     after(function(done) {
         exec('rm ' + __dirname + '/.xinitrc', done);
     });
@@ -48,7 +44,8 @@ describe('properties', function() {
             expected = 'exec /usr/bin/chromium --noerrdialogs --kiosk --incognito http://test.com';
 
         // use test .xinitrc
-        format.xinitrcPath = __dirname + '/.xinitrc';
+        format.xinitrcTplPath = __dirname + '/.xinitrc.tpl';
+        format.xinitrcFinalPath = format.xinitrcTplPath.replace('.tpl', '');
 
         // replace $url token with url string
         command = format.start_command({}, {
@@ -57,8 +54,10 @@ describe('properties', function() {
 
         assert(typeof command === 'string');
 
-        fs.readFile(format.xinitrcPath, 'utf8', function(err, data) {
-            if (err) throw err;
+        fs.readFile(format.xinitrcFinalPath, 'utf8', function(err, data) {
+            if (err) {
+                throw err;
+            }
             assert.equal(data, expected);
             done();
         });

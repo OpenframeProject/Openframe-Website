@@ -15,13 +15,15 @@ module.exports = new Extension({
         'display_name': 'Website',
         'download': false,
         'start_command': function(args, tokens) {
+            // 1. clone template .xinitrc
+            var filePath = _cloneTemplate(this.xinitrcTplPath);
             // 1. replace tokens in .xinitrc
-            _replaceTokens(this.xinitrcPath, tokens);
+            _replaceTokens(filePath, tokens);
             // 2. return xinit
-            return 'xinit ' + this.xinitrcPath;
+            return 'xinit ' + filePath;
         },
-        'end_command': 'sudo pkill -f chromium',
-        xinitrcPath: __dirname + '/scripts/.xinitrc'
+        'end_command': 'pkill -f X',
+        xinitrcTplPath: __dirname + '/scripts/.xinitrc.tpl'
     },
 });
 
@@ -33,11 +35,13 @@ module.exports = new Extension({
  * @return {string} The string with tokens replaced.
  */
 function _replaceTokens(filePath, tokens) {
+    console.log(_replaceTokens, filePath, tokens);
 
     function replace(token, value) {
-        // tokens start with a $, oops
-        token = '\\' + token;
-        var cmd = 'sed -i "s,' + token + ',' + value + ',g" ' + filePath;
+        // tokens start with a $ which needs to be escaped, oops
+        var _token = '\\' + token,
+            // use commas as delims so that we don't need to escape value, which might be a URL
+            cmd = 'sudo sed -i "s,' + _token + ',' + value + ',g" ' + filePath;
         execSync(cmd);
     }
 
@@ -46,4 +50,18 @@ function _replaceTokens(filePath, tokens) {
         // TODO: better token replacement (global replacement?
         replace(key, tokens[key]);
     }
+}
+
+/**
+ * Clone xinitrc
+ *
+ * @return {string} The string with tokens replaced.
+ */
+function _cloneTemplate(filePath) {
+    var newFilePath = filePath.replace('.tpl', ''),
+        cmd = 'cp -f ' + filePath + ' ' + newFilePath;
+
+    execSync(cmd);
+
+    return newFilePath;
 }

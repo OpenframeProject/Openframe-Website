@@ -5,4 +5,4 @@ artwork/
 npm-debug.log
 coverage/*
 player/*
-test/.xinitrc
+.xinitrc
