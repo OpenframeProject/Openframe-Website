@@ -40,8 +40,11 @@ function _replaceTokens(filePath, tokens) {
     function replace(token, value) {
         // tokens start with a $ which needs to be escaped, oops
         var _token = '\\' + token,
+            // any '&' character needs to be escaped in the value, 
+            //  otherwise it is used as a backreference
+            _value = value.replace(/&/g, '\\&'),
             // use commas as delims so that we don't need to escape value, which might be a URL
-            cmd = 'sed -i "s,' + _token + ',' + value + ',g" ' + filePath;
+            cmd = 'sed -i "s,' + _token + ',' + _value + ',g" ' + filePath;
         execSync(cmd);
     }
 
