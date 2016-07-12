@@ -38,22 +38,31 @@ module.exports = new Extension({
  * @param {object} tokens Original tokens for this extension
  */
 function _extendTokens(args, tokens) {
-    var _tokens = {},
-        expectedKeys = ['flags'];
+    // if we have an args object, there might be properties we want to
+    // migrate into the tokens object.
+    if (typeof(args) === 'object') {
 
-    // shallow-copy the original tokens object
-    for (let key in tokens) {
-        _tokens[key] = tokens[key];
+        var _tokens = {},
+            expectedKeys = ['flags'];
+
+        // shallow-copy the original tokens object
+        for (let key in tokens) {
+            _tokens[key] = tokens[key];
+        }
+
+        // copy expected arguments from args to the new tokens object
+        // defaulting to an emptystring
+        for (let key of expectedKeys) {
+            // prepend keys with a dollar-sign for template-replacement
+            _tokens['$'+key] = args[key] || '';
+        }
+
+        return _tokens;
     }
-
-    // copy expected arguments from args to the new tokens object
-    // defaulting to an emptystring
-    for (let key of expectedKeys) {
-        // prepend keys with a dollar-sign for template-replacement
-        _tokens['$'+key] = args[key] || '';
+    // otherwise we just pass through the original tokens object
+    else {
+        return tokens;
     }
-
-    return _tokens;
 }
 
 /**
