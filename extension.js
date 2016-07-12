@@ -17,12 +17,12 @@ module.exports = new Extension({
         'download': false,
         'start_command': function(args, tokens) {
             // 1. clone template .xinitrc
-            var filePath = _cloneTemplate(this.xinitrcTplPath);
-            // 1. parse options from args into tokens
-            var _tokens = _extendTokens(args, tokens);
-            // 1. replace tokens in .xinitrc
+            var filePath = _cloneTemplate(this.xinitrcTplPath),
+                // 2. parse options from args into tokens
+                _tokens = _extendTokens(args, tokens);
+            // 3. replace tokens in .xinitrc
             _replaceTokens(filePath, _tokens);
-            // 2. return xinit
+            // 4. return xinit
             return 'xinit ' + filePath;
         },
         'end_command': 'pkill -f X',
@@ -36,22 +36,23 @@ module.exports = new Extension({
  * @param {object} args Arguments provided to this extension
  * @param {object} tokens Original tokens for this extension
  */
-function _extendTokens(args, tokens){
-  var _tokens = {};
-  // shallow-copy the original tokens object
-  for (var key in tokens){
-    _tokens[key] = tokens[key];
-  }
+function _extendTokens(args, tokens) {
+    var _tokens = {},
+        expectedKeys = ['flags'];
 
-  // copy expected arguments from args to the new tokens object
-  // defaulting to an emptystring
-  var expectedKeys = ['flags'];
-  for (var key of expectedKeys){
-    // prepend keys with a dollar-sign for template-replacement
-    _tokens['$'+key] = args[key] || '';
-  }
-  
-  return _tokens;
+    // shallow-copy the original tokens object
+    for (let key in tokens) {
+        _tokens[key] = tokens[key];
+    }
+
+    // copy expected arguments from args to the new tokens object
+    // defaulting to an emptystring
+    for (let key of expectedKeys) {
+        // prepend keys with a dollar-sign for template-replacement
+        _tokens['$'+key] = args[key] || '';
+    }
+
+    return _tokens;
 }
 
 /**
@@ -67,7 +68,7 @@ function _replaceTokens(filePath, tokens) {
     function replace(token, value) {
         // tokens start with a $ which needs to be escaped, oops
         var _token = '\\' + token,
-            // any '&' character needs to be escaped in the value, 
+            // any '&' character needs to be escaped in the value,
             //  otherwise it is used as a backreference
             _value = value.replace(/&/g, '\\&'),
             // use commas as delims so that we don't need to escape value, which might be a URL
