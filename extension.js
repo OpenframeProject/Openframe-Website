@@ -1,6 +1,7 @@
 var pjson = require('./package.json'),
     Extension = require('openframe-extension'),
-    execSync = require('child_process').execSync;
+    execSync = require('child_process').execSync,
+    debug = require('debug')('openframe-website');
 
 /**
  * Extensions should expose an instance of the Extension class.
@@ -35,7 +36,7 @@ module.exports = new Extension({
  * @return {string} The string with tokens replaced.
  */
 function _replaceTokens(filePath, tokens) {
-    console.log(_replaceTokens, filePath, tokens);
+    debug(_replaceTokens, filePath, tokens);
 
     function replace(token, value) {
         // tokens start with a $ which needs to be escaped, oops
