@@ -23,6 +23,7 @@ if [ $os == "Linux" ]; then
     # same for any debian disto (untested), including rpi (tested)
     sudo apt-get install chromium
     sudo apt-get install unclutter
+    sudo apt-get install matchbox-window-manager
 
     if [ $arq == "armv7l" ] || [ $arq == "armv6l" ]; then
         # on RaspberryPi or other arm 6/7 device
