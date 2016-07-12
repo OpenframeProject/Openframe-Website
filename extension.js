@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var pjson = require('./package.json'),
     Extension = require('openframe-extension'),
     execSync = require('child_process').execSync,
