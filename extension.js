@@ -18,8 +18,10 @@ module.exports = new Extension({
         'start_command': function(args, tokens) {
             // 1. clone template .xinitrc
             var filePath = _cloneTemplate(this.xinitrcTplPath);
+            // 1. parse options from args into tokens
+            var _tokens = _extendTokens(args, tokens);
             // 1. replace tokens in .xinitrc
-            _replaceTokens(filePath, tokens);
+            _replaceTokens(filePath, _tokens);
             // 2. return xinit
             return 'xinit ' + filePath;
         },
@@ -27,6 +29,30 @@ module.exports = new Extension({
         xinitrcTplPath: __dirname + '/scripts/.xinitrc.tpl'
     },
 });
+
+/**
+ * extend the tokens with expected values from args
+ *
+ * @param {object} args Arguments provided to this extension
+ * @param {object} tokens Original tokens for this extension
+ */
+function _extendTokens(args, tokens){
+  var _tokens = {};
+  // shallow-copy the original tokens object
+  for (var key in tokens){
+    _tokens[key] = tokens[key];
+  }
+
+  // copy expected arguments from args to the new tokens object
+  // defaulting to an emptystring
+  var expectedKeys = ['flags'];
+  for (var key of expectedKeys){
+    // prepend keys with a dollar-sign for template-replacement
+    _tokens['$'+key] = args[key] || '';
+  }
+  
+  return _tokens;
+}
 
 /**
  * Replace tokens in a file.
