@@ -1,1 +1,1 @@
-exec /usr/bin/chromium --noerrdialogs --kiosk --incognito $url
+exec /usr/bin/chromium --noerrdialogs --kiosk --incognito $flags "$url"
