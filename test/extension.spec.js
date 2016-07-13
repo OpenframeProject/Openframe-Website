@@ -11,10 +11,6 @@ describe('instantiation', function() {
 });
 
 describe('properties', function() {
-    after(function(done) {
-        exec('rm ' + __dirname + '/.xinitrc', done);
-    });
-
     it('should include all required format properties', function() {
         var format = WebsiteExtension.props.format;
 
@@ -37,15 +33,18 @@ describe('properties', function() {
         assert(format.end_command);
         assert(typeof format.end_command === 'string');
     });
+});
 
-    it('start_command should update .xinitrc file with supplied token', function(done) {
-        var format = WebsiteExtension.props.format,
-            command,
-            expected = 'exec /usr/bin/chromium --noerrdialogs --kiosk --incognito http://test.com';
+describe('start_command', function() {
+    var expectedDefault = 'exec /usr/bin/chromium --noerrdialogs --kiosk --incognito  "http://test.com"';
 
-        // use test .xinitrc
-        format.xinitrcTplPath = __dirname + '/.xinitrc.tpl';
-        format.xinitrcFinalPath = format.xinitrcTplPath.replace('.tpl', '');
+    after(function(done) {
+        exec('rm ' + __dirname + '/.xinitrc', done);
+    });
+
+    it('should update .xinitrc file with supplied token', function(done) {
+        var format = getTestFormat(),
+            command;
 
         // replace $url token with url string
         command = format.start_command({}, {
@@ -53,13 +52,62 @@ describe('properties', function() {
         });
 
         assert(typeof command === 'string');
+        checkXinitrc(format.xinitrcFinalPath, expectedDefault, done);
+    });
+    it('should not accept undefined args parameter', function(done) {
+        var format = getTestFormat(),
+            command;
 
-        fs.readFile(format.xinitrcFinalPath, 'utf8', function(err, data) {
+        // replace $url token with url string
+        command = format.start_command(undefined, {
+            $url: 'http://test.com'
+        });
+
+        assert(typeof command === 'string');
+        checkXinitrc(format.xinitrcFinalPath, expectedDefault, done);
+    });
+    it('should update .xinitrc with optional args', function(done) {
+        var format = getTestFormat(),
+            command,
+            expected = 'exec /usr/bin/chromium --noerrdialogs --kiosk --incognito --allow-insecure-localhost "http://test.com"';
+
+        // replace $url token with url string
+        command = format.start_command({flags:'--allow-insecure-localhost'}, {
+            $url: 'http://test.com'
+        });
+
+        assert(typeof command === 'string');
+        checkXinitrc(format.xinitrcFinalPath, expected, done);
+    });
+    it('should ignore unsupported args', function(done) {
+        var format = getTestFormat(),
+            command;
+
+        // replace $url token with url string
+        command = format.start_command({random:'args'}, {
+            $url: 'http://test.com'
+        });
+
+        assert(typeof command === 'string');
+        checkXinitrc(format.xinitrcFinalPath, expectedDefault, done);
+    });
+
+    function checkXinitrc(path, expected, done) {
+        fs.readFile(path, 'utf8', function(err, data) {
             if (err) {
                 throw err;
             }
             assert.equal(data, expected);
             done();
         });
-    });
+    }
+    function getTestFormat() {
+        var format = WebsiteExtension.props.format;
+
+        // set test .xinitrc.tpl
+        format.xinitrcTplPath = __dirname + '/.xinitrc.tpl';
+        format.xinitrcFinalPath = format.xinitrcTplPath.replace('.tpl', '');
+
+        return format;
+    }
 });

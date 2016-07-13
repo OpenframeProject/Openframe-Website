@@ -1,6 +1,8 @@
+'use strict';
 var pjson = require('./package.json'),
     Extension = require('openframe-extension'),
-    execSync = require('child_process').execSync;
+    execSync = require('child_process').execSync,
+    debug = require('debug')('openframe-website');
 
 /**
  * Extensions should expose an instance of the Extension class.
@@ -16,16 +18,49 @@ module.exports = new Extension({
         'download': false,
         'start_command': function(args, tokens) {
             // 1. clone template .xinitrc
-            var filePath = _cloneTemplate(this.xinitrcTplPath);
-            // 1. replace tokens in .xinitrc
-            _replaceTokens(filePath, tokens);
-            // 2. return xinit
+            var filePath = _cloneTemplate(this.xinitrcTplPath),
+                // 2. parse options from args into tokens
+                _tokens = _extendTokens(args, tokens);
+            // 3. replace tokens in .xinitrc
+            _replaceTokens(filePath, _tokens);
+            // 4. return xinit
             return 'xinit ' + filePath;
         },
         'end_command': 'pkill -f X',
         xinitrcTplPath: __dirname + '/scripts/.xinitrc.tpl'
     },
 });
+
+/**
+ * extend the tokens with expected values from args
+ *
+ * @param {object} args Arguments provided to this extension
+ * @param {object} tokens Original tokens for this extension
+ */
+function _extendTokens(args, tokens) {
+    var _tokens = {},
+        _args = args,
+        expectedKeys = ['flags'];
+
+    // if args is not an object, we'll just use an empty one
+    if (typeof(args) !== 'object') {
+        _args = {};
+    }
+
+    // shallow-copy the original tokens object
+    for (let key in tokens) {
+        _tokens[key] = tokens[key];
+    }
+
+    // copy expected arguments from args to the new tokens object
+    // defaulting to an emptystring
+    for (let key of expectedKeys) {
+        // prepend keys with a dollar-sign for template-replacement
+        _tokens['$'+key] = _args[key] || '';
+    }
+
+    return _tokens;
+}
 
 /**
  * Replace tokens in a file.
@@ -35,12 +70,12 @@ module.exports = new Extension({
  * @return {string} The string with tokens replaced.
  */
 function _replaceTokens(filePath, tokens) {
-    console.log(_replaceTokens, filePath, tokens);
+    debug(_replaceTokens, filePath, tokens);
 
     function replace(token, value) {
         // tokens start with a $ which needs to be escaped, oops
         var _token = '\\' + token,
-            // any '&' character needs to be escaped in the value, 
+            // any '&' character needs to be escaped in the value,
             //  otherwise it is used as a backreference
             _value = value.replace(/&/g, '\\&'),
             // use commas as delims so that we don't need to escape value, which might be a URL

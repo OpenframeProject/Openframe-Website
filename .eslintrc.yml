@@ -73,7 +73,8 @@ env:
   commonjs: true
   mocha: true
 
-
+parserOptions:
+  ecmaVersion: 6
 
 
 globals:
