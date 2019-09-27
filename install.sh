@@ -21,9 +21,7 @@ if [ $os == "Linux" ]; then
     # sudo apt-get upgrade
 
     # same for any debian disto (untested), including rpi (tested)
-    sudo apt-get install chromium
-    sudo apt-get install unclutter
-    sudo apt-get install matchbox-window-manager
+    sudo apt-get install -y chromium unclutter matchbox-window-manager
 
     if [ $arq == "armv7l" ] || [ $arq == "armv6l" ]; then
         # on RaspberryPi or other arm 6/7 device
