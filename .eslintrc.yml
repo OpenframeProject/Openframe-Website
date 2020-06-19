@@ -72,9 +72,9 @@ env:
   # allow commonjs module definition globals (e.g. require, module.exports)
   commonjs: true
   mocha: true
+  es6: true
 
-parserOptions:
-  ecmaVersion: 6
+
 
 
 globals:
