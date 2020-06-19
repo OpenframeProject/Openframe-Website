@@ -18,29 +18,33 @@ module.exports = new Extension({
         'display_name': 'Website',
         'download': false,
         'start_command': function(args, tokens) {
-          return new Promise(function(resolve, reject) {
-            // is X server running?
-            let processes = await psList()
-            processes = processes.filter(process => process.name.indexOf('Xorg') > -1)
+            return new Promise(function(resolve, reject) {
+                // is X server running?
+                psList().then(function(processes) {
+                    processes = processes.filter(function(process) { process.name.indexOf('Xorg') > -1; });
 
-            let commandLineMode = processes.length > 0
-            
-            // command line mode
-            if (commandLineMode) {
-              // 1. clone template .xinitrc
-              var filePath = _cloneTemplate(this.xinitrcTplPath),
-                  // 2. parse options from args into tokens
-                  _tokens = _extendTokens(args, tokens);
-              // 3. replace tokens in .xinitrc
-              _replaceTokens(filePath, _tokens);
-              // 4. return xinit
-              resolve('xinit ' + filePath);
-            } 
-            // desktop mode
-            else {
-              resolve('/usr/bin/chromium --noerrdialogs --kiosk --incognito $flags "$url"')
-            }
-          }
+                    let commandLineMode = processes.length > 0;
+
+                    // command line mode
+                    if (commandLineMode) {
+                        // 1. clone template .xinitrc
+                        var filePath = _cloneTemplate(this.xinitrcTplPath),
+                            // 2. parse options from args into tokens
+                            _tokens = _extendTokens(args, tokens);
+                            // 3. replace tokens in .xinitrc
+                        _replaceTokens(filePath, _tokens);
+                        // 4. return xinit
+                        resolve('xinit ' + filePath);
+                    }
+                    // desktop mode
+                    else {
+                        resolve('/usr/bin/chromium --noerrdialogs --kiosk --incognito $flags "$url"');
+                    }
+                });
+
+
+            });
+
         },
         // 'end_command': 'pkill -f X',
         'end_command': 'pkill -f chromium', // TODO: kill x server in command line mode
