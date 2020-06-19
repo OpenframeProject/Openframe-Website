@@ -2,7 +2,8 @@
 var pjson = require('./package.json'),
     Extension = require('openframe-extension'),
     execSync = require('child_process').execSync,
-    debug = require('debug')('openframe-website');
+    debug = require('debug')('openframe-website'),
+    psList = require('ps-list');
 
 /**
  * Extensions should expose an instance of the Extension class.
@@ -17,16 +18,32 @@ module.exports = new Extension({
         'display_name': 'Website',
         'download': false,
         'start_command': function(args, tokens) {
-            // 1. clone template .xinitrc
-            var filePath = _cloneTemplate(this.xinitrcTplPath),
-                // 2. parse options from args into tokens
-                _tokens = _extendTokens(args, tokens);
-            // 3. replace tokens in .xinitrc
-            _replaceTokens(filePath, _tokens);
-            // 4. return xinit
-            return 'xinit ' + filePath;
+          return new Promise(function(resolve, reject) {
+            // is X server running?
+            let processes = await psList()
+            processes = processes.filter(process => process.name.indexOf('Xorg') > -1)
+
+            let commandLineMode = processes.length > 0
+            
+            // command line mode
+            if (commandLineMode) {
+              // 1. clone template .xinitrc
+              var filePath = _cloneTemplate(this.xinitrcTplPath),
+                  // 2. parse options from args into tokens
+                  _tokens = _extendTokens(args, tokens);
+              // 3. replace tokens in .xinitrc
+              _replaceTokens(filePath, _tokens);
+              // 4. return xinit
+              resolve('xinit ' + filePath);
+            } 
+            // desktop mode
+            else {
+              resolve('/usr/bin/chromium --noerrdialogs --kiosk --incognito $flags "$url"')
+            }
+          }
         },
-        'end_command': 'pkill -f X',
+        // 'end_command': 'pkill -f X',
+        'end_command': 'pkill -f chromium', // TODO: kill x server in command line mode
         xinitrcTplPath: __dirname + '/scripts/.xinitrc.tpl'
     },
 });
